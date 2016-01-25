@@ -3,8 +3,8 @@ extern crate libc;
 
 #[doc(hidden)]
 pub mod raw;
-#[doc(hidden)]
 mod stmt;
+mod statement_iterator;
 
 use std::ffi::CStr;
 
@@ -51,9 +51,9 @@ impl Connection for SqliteConnection {
         Self::Backend: HasSqlType<T::SqlType>,
         U: Queryable<T::SqlType, Self::Backend>,
     {
-        // let sql = try!(self.prepare_query(&source.as_query()));
-        // let _stmt = try!(Statement::prepare(&self.raw_connection, &sql));
-        unimplemented!()
+        let sql = try!(self.prepare_query(&source.as_query()));
+        let stmt = try!(Statement::prepare(&self.raw_connection, &sql));
+        // Box::new(StatementIterator::new(stmt)) as Box<Iterator<Item=U>>
     }
 
     fn execute_returning_count<T>(&self, source: &T) -> QueryResult<usize> where
@@ -89,9 +89,9 @@ impl SqliteConnection {
     fn prepare_query<T: QueryFragment<Sqlite>>(&self, source: &T) -> QueryResult<Statement> {
         let mut query_builder = SqliteQueryBuilder::new();
         try!(source.to_sql(&mut query_builder).map_err(QueryBuilderError));
-        let result = try!(Statement::prepare(&self.raw_connection, &query_builder.sql));
+        let mut result = try!(Statement::prepare(&self.raw_connection, &query_builder.sql));
 
-        for (tpe, value) in result.bind_params.into_iter() {
+        for (tpe, value) in query_builder.bind_params.into_iter() {
             try!(result.bind(tpe, value));
         }
 

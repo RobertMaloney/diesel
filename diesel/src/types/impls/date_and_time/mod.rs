@@ -67,12 +67,10 @@ impl PgInterval {
     }
 }
 
-primitive_impls! {
-    Date -> (PgDate, 1082, 1182),
-    Interval -> (PgInterval, 1186, 1187),
-    Time -> (PgTime, 1083, 1183),
-    Timestamp -> (PgTimestamp, 1114, 1115),
-}
+primitive_impls!(Date -> (PgDate, pg: (1082, 1182)));
+primitive_impls!(Interval -> (PgInterval, pg: (1186, 1187)));
+primitive_impls!(Time -> (PgTime, pg: (1083, 1183)));
+primitive_impls!(Timestamp -> (PgTimestamp, pg: (1114, 1115)));
 
 impl ToSql<types::Timestamp, Pg> for PgTimestamp {
     fn to_sql<W: Write>(&self, out: &mut W) -> Result<IsNull, Box<Error>> {

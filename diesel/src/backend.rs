@@ -11,13 +11,13 @@ pub trait Backend where
     Self: HasSqlType<types::BigInt>,
     Self: HasSqlType<types::Float>,
     Self: HasSqlType<types::Double>,
-    Self: HasSqlType<types::Numeric>,
+    // Self: HasSqlType<types::Numeric>,
     Self: HasSqlType<types::VarChar>,
     Self: HasSqlType<types::Text>,
     Self: HasSqlType<types::Binary>,
-    Self: HasSqlType<types::Date>,
-    Self: HasSqlType<types::Time>,
-    Self: HasSqlType<types::Timestamp>,
+    // Self: HasSqlType<types::Date>,
+    // Self: HasSqlType<types::Time>,
+    // Self: HasSqlType<types::Timestamp>,
 {
     type QueryBuilder: QueryBuilder<Self>;
 }
@@ -60,11 +60,14 @@ pub enum SqliteType {
     Float,
     Double,
     SmallInt,
-    Int,
+    Integer,
     Long,
 }
 
 impl Default for SqliteType {
+    fn default() -> Self {
+        SqliteType::Text
+    }
 }
 
 impl Backend for Sqlite {

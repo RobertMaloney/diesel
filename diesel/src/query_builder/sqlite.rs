@@ -1,18 +1,18 @@
-use backend::Sqlite;
+use backend::{Sqlite, SqliteType};
 use super::{QueryBuilder, BuildQueryResult, Context};
 use types::HasSqlType;
 
 #[doc(hidden)]
 pub struct SqliteQueryBuilder {
     pub sql: String,
-    context_stack: Vec<Context>,
+    pub bind_params: Vec<(SqliteType, Option<Vec<u8>>)>,
 }
 
 impl SqliteQueryBuilder {
     pub fn new() -> Self {
         SqliteQueryBuilder {
             sql: String::new(),
-            context_stack: Vec::new(),
+            bind_params: Vec::new(),
         }
     }
 }
@@ -30,17 +30,13 @@ impl QueryBuilder<Sqlite> for SqliteQueryBuilder {
     fn push_bound_value<T>(&mut self, bind: Option<Vec<u8>>) where
         Sqlite: HasSqlType<T>,
     {
-        match (self.context_stack.first(), bind) {
-            (Some(&Context::Insert), None) => self.push_sql("NULL"),
-            _ => self.push_sql("?"),
-        }
+        self.push_sql("?");
+        self.bind_params.push((Sqlite::metadata(), bind));
     }
 
-    fn push_context(&mut self, context: Context) {
-        self.context_stack.push(context);
+    fn push_context(&mut self, _context: Context) {
     }
 
     fn pop_context(&mut self) {
-        self.context_stack.pop();
     }
 }
