@@ -1,16 +1,20 @@
 extern crate libsqlite3_sys as ffi;
 extern crate libc;
+extern crate byteorder;
 
 use std::ffi::CString;
 use std::ptr;
+use std::io::prelude::*;
+use self::byteorder::{ReadBytesExt, WriteBytesExt, BigEndian};
 
 use backend::SqliteType;
 use result::*;
-use result::Error::DatabaseError;
+use result::Error::{DatabaseError, QueryBuilderError};
 use super::raw::RawConnection;
 
 pub struct Statement {
     inner_statement: *mut ffi::sqlite3_stmt,
+    bind_index: libc::c_int,
 }
 
 impl Statement {
@@ -26,26 +30,61 @@ impl Statement {
             )
         };
 
-        if prepare_result != ffi::SQLITE_OK {
-            Err(DatabaseError(super::error_message(prepare_result).into()))
-        } else {
-            Ok(Statement { inner_statement: stmt })
-        }
+        ensure_sqlite_ok(prepare_result)
+            .map(|_| Statement { inner_statement: stmt, bind_index: 0 })
     }
 
     pub fn run(&self) -> QueryResult<()> {
         Ok(())
     }
 
-    pub fn bind(&self, tpe: SqliteType, value: Option<Vec<u8>>) -> QueryResult<()> {
+    pub fn bind(&mut self, tpe: SqliteType, value: Option<Vec<u8>>) -> QueryResult<()> {
+        self.bind_index += 1;
+        let result = unsafe { match (tpe, value) {
+            (_, None) =>
+                ffi::sqlite3_bind_null(self.inner_statement, self.bind_index),
+            (SqliteType::Binary, Some(bytes)) =>
+                ffi::sqlite3_bind_blob(
+                    self.inner_statement,
+                    self.bind_idx,
+                    bytes.as_ptr(),
+                    bytes.len(),
+                    ffi::SQLITE_TRANSIENT,
+                ),
+            (SqliteType::Text, Some(bytes)) =>
+                ffi::sqlite3_bind_text(
+                    self.inner_statement,
+                    self.bind_idx,
+                    bytes.as_ptr(),
+                    bytes.len(),
+                    ffi::SQLITE_TRANSIENT,
+                ),
+            (SqliteType::Float, Some(bytes)) => {
+                let value = try!(bytes.read_f32::<BigEndian>()
+                    .map_err(|e| QueryBuilderError(Box::new(e))));
+                ffi::sqlite3_bind_double(
+                    self.inner_statement,
+                    self.bind_idx,
+                    value as libc::c_double,
+                )
+            }
+        }};
+
+        ensure_sqlite_ok(result)
+    }
+}
+
+fn ensure_sqlite_ok(code: libc::c_int) -> QueryResult<()> {
+    if code != ffi::SQLITE_OK {
+        Err(DatabaseError(super::error_message(code).into()))
+    } else {
+        Ok(())
     }
 }
 
 impl Drop for Statement {
     fn drop(&mut self) {
         let finalize_result = unsafe { ffi::sqlite3_finalize(self.inner_statement) };
-        if finalize_result != ffi::SQLITE_OK {
-            panic!("{}", super::error_message(finalize_result));
-        }
+        ensure_sqlite_ok(finalize_result).unwrap();
     }
 }
