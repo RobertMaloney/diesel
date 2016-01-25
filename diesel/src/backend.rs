@@ -54,10 +54,23 @@ impl TypeMetadata for Pg {
 
 pub struct Sqlite;
 
+pub enum SqliteType {
+    Binary,
+    Text,
+    Float,
+    Double,
+    SmallInt,
+    Int,
+    Long,
+}
+
+impl Default for SqliteType {
+}
+
 impl Backend for Sqlite {
     type QueryBuilder = SqliteQueryBuilder;
 }
 
 impl TypeMetadata for Sqlite {
-    type TypeMetadata = ();
+    type TypeMetadata = SqliteType;
 }

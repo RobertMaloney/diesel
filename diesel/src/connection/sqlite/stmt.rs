@@ -4,6 +4,7 @@ extern crate libc;
 use std::ffi::CString;
 use std::ptr;
 
+use backend::SqliteType;
 use result::*;
 use result::Error::DatabaseError;
 use super::raw::RawConnection;
@@ -34,6 +35,9 @@ impl Statement {
 
     pub fn run(&self) -> QueryResult<()> {
         Ok(())
+    }
+
+    pub fn bind(&self, tpe: SqliteType, value: Option<Vec<u8>>) -> QueryResult<()> {
     }
 }
 

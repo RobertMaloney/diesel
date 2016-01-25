@@ -91,16 +91,9 @@ impl SqliteConnection {
         try!(source.to_sql(&mut query_builder).map_err(QueryBuilderError));
         let result = try!(Statement::prepare(&self.raw_connection, &query_builder.sql));
 
-        // for (tpe, value) in result.bind_params.into_iter() {
-        //     match tpe {
-        //         SqliteType::Null => {},
-        //         SqliteType::Binary => {},
-        //         SqliteType::Text => {},
-        //         SqliteType::Double => {},
-        //         SqliteType::Int => {},
-        //         SqliteType::Long => {},
-        //     }
-        // }
+        for (tpe, value) in result.bind_params.into_iter() {
+            try!(result.bind(tpe, value));
+        }
 
         Ok(result)
     }
