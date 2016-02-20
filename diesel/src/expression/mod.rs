@@ -136,6 +136,16 @@ impl<T: NonAggregate + ?Sized> NonAggregate for Box<T> {
 impl<'a, T: NonAggregate + ?Sized> NonAggregate for &'a T {
 }
 
+/// Marker trait to indicate that an expression only includes aggregates.
+pub trait Aggregate: Expression {
+}
+
+impl<T: Aggregate + ?Sized> Aggregate for Box<T> {
+}
+
+impl<'a, T: Aggregate + ?Sized> Aggregate for &'a T {
+}
+
 use query_builder::QueryFragment;
 
 /// Helper trait used when boxing expressions. This exists to work around the

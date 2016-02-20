@@ -1,5 +1,5 @@
 use backend::{Backend, SupportsDefaultKeyword};
-use expression::{Expression, SelectableExpression, NonAggregate};
+use expression::{Expression, SelectableExpression, NonAggregate, Aggregate};
 use persistable::{ColumnInsertValue, InsertValues};
 use query_builder::{Changeset, AsChangeset, QueryBuilder, BuildQueryResult, QueryFragment};
 use query_source::{QuerySource, Queryable, Table, Column};
@@ -70,7 +70,7 @@ macro_rules! tuple_impls {
                 }
             }
 
-            impl<$($T: Expression + NonAggregate),+> Expression for ($($T,)+) {
+            impl<$($T: Expression),+> Expression for ($($T,)+) {
                 type SqlType = ($(<$T as Expression>::SqlType),+);
             }
 
@@ -88,6 +88,9 @@ macro_rules! tuple_impls {
             }
 
             impl<$($T: Expression + NonAggregate),+> NonAggregate for ($($T,)+) {
+            }
+
+            impl<$($T: Expression + Aggregate),+> Aggregate for ($($T,)+) {
             }
 
             impl<$($T,)+ $($ST,)+ Tab, DB> InsertValues<DB>

@@ -1,5 +1,5 @@
 use backend::Backend;
-use expression::{Expression, SelectableExpression};
+use expression::{Expression, Aggregate, SelectableExpression};
 use query_builder::*;
 use types::{SqlOrd, HasSqlType};
 
@@ -22,6 +22,12 @@ macro_rules! ord_function {
 
         impl<T: Expression> Expression for $type_name<T> {
             type SqlType = T::SqlType;
+        }
+
+        impl<ST, T> Aggregate for $type_name<T> where
+            ST: SqlOrd,
+            T: Expression<SqlType=ST>
+        {
         }
 
         impl<T, DB> QueryFragment<DB> for $type_name<T> where

@@ -1,5 +1,5 @@
 use backend::Backend;
-use expression::{Expression, SelectableExpression};
+use expression::{Expression, Aggregate, SelectableExpression};
 use query_builder::*;
 use types::{Foldable, HasSqlType};
 
@@ -25,6 +25,12 @@ macro_rules! fold_function {
             T: Expression<SqlType=ST>
         {
             type SqlType = <<T as Expression>::SqlType as Foldable>::$type_name;
+        }
+
+        impl<ST, T> Aggregate for $type_name<T> where
+            ST: Foldable,
+            T: Expression<SqlType=ST>
+        {
         }
 
         impl<T, DB> QueryFragment<DB> for $type_name<T> where
