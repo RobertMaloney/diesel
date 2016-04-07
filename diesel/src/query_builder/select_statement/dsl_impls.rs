@@ -7,7 +7,7 @@ use query_builder::limit_clause::*;
 use query_builder::offset_clause::*;
 use query_builder::order_clause::*;
 use query_builder::where_clause::*;
-use query_builder::{Query, QueryFragment, SelectStatement};
+use query_builder::{Query, CombinableQuery, QueryFragment, SelectStatement, UnionStatement};
 use query_dsl::*;
 use query_dsl::boxed_dsl::InternalBoxedDsl;
 use super::BoxedSelectStatement;
@@ -210,5 +210,21 @@ impl<'a, ST, S, F, D, W, O, L, Of, G, DB> InternalBoxedDsl<'a, DB>
             Box::new(self.limit),
             Box::new(self.offset),
         )
+    }
+}
+
+impl<ST, S, F, W, O, L, Of, G, Union, Type> UnionDsl<Union, Type>
+    for SelectStatement<ST, S, F, W, O, L, Of, G> where
+    Union: CombinableQuery + Query<SqlType=Type>,
+    SelectStatement<ST, S, F, W, O, L, Of, G>: Query<SqlType=Type>,
+{
+    type Output = UnionStatement<SelectStatement<ST, S, F, W, O, L, Of, G>, Union>;
+
+    fn union(self, query: Union) -> Self::Output {
+        UnionStatement::new(self, query, false)
+    }
+
+    fn union_all(self, query: Union) -> Self::Output {
+        UnionStatement::new(self, query, true)
     }
 }

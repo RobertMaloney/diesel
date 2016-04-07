@@ -17,6 +17,7 @@ mod select_statement;
 mod where_clause;
 pub mod insert_statement;
 pub mod update_statement;
+mod union_statement;
 
 #[doc(hidden)]
 pub use self::select_statement::{SelectStatement, BoxedSelectStatement};
@@ -24,6 +25,8 @@ pub use self::select_statement::{SelectStatement, BoxedSelectStatement};
 pub use self::update_statement::{IncompleteUpdateStatement, AsChangeset, Changeset, UpdateTarget};
 #[doc(inline)]
 pub use self::insert_statement::IncompleteInsertStatement;
+#[doc(inline)]
+pub use self::union_statement::UnionStatement;
 
 use std::error::Error;
 
@@ -109,3 +112,6 @@ impl<T: Query> AsQuery for T {
         self
     }
 }
+
+#[doc(hidden)]
+pub trait CombinableQuery: Query {}
