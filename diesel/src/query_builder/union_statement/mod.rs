@@ -1,3 +1,5 @@
+mod dsl_impls;
+
 use backend::Backend;
 use super::{Query, CombinableQuery, QueryBuilder, QueryFragment, BuildQueryResult};
 
