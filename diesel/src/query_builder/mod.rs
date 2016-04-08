@@ -18,6 +18,7 @@ mod where_clause;
 pub mod insert_statement;
 pub mod update_statement;
 mod union_statement;
+mod intersect_statement;
 
 #[doc(hidden)]
 pub use self::select_statement::{SelectStatement, BoxedSelectStatement};
@@ -27,6 +28,8 @@ pub use self::update_statement::{IncompleteUpdateStatement, AsChangeset, Changes
 pub use self::insert_statement::IncompleteInsertStatement;
 #[doc(inline)]
 pub use self::union_statement::UnionStatement;
+#[doc(inline)]
+pub use self::intersect_statement::IntersectStatement;
 
 use std::error::Error;
 

@@ -2,11 +2,11 @@ use query_builder::{Query, CombinableQuery, UnionStatement, IntersectStatement};
 use query_dsl::*;
 
 impl<L, R, Union, Type> UnionDsl<Union, Type>
-    for UnionStatement<L, R> where
+    for IntersectStatement<L, R> where
     Union: CombinableQuery + Query<SqlType=Type>,
-    UnionStatement<L, R>: Query<SqlType=Type>,
+    IntersectStatement<L, R>: Query<SqlType=Type>,
 {
-    type Output = UnionStatement<UnionStatement<L, R>, Union>;
+    type Output = UnionStatement<IntersectStatement<L, R>, Union>;
 
     fn union(self, query: Union) -> Self::Output {
         UnionStatement::new(self, query, false)
@@ -18,11 +18,11 @@ impl<L, R, Union, Type> UnionDsl<Union, Type>
 }
 
 impl<L, R, Intersect, Type> IntersectDsl<Intersect, Type>
-    for UnionStatement<L, R> where
+    for IntersectStatement<L, R> where
     Intersect: CombinableQuery + Query<SqlType=Type>,
-    UnionStatement<L, R>: Query<SqlType=Type>,
+    IntersectStatement<L, R>: Query<SqlType=Type>,
 {
-    type Output = IntersectStatement<UnionStatement<L, R>, Intersect>;
+    type Output = IntersectStatement<IntersectStatement<L, R>, Intersect>;
 
     fn intersect(self, query: Intersect) -> Self::Output {
         IntersectStatement::new(self, query, false)
