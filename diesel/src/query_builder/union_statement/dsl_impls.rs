@@ -1,4 +1,4 @@
-use query_builder::{Query, CombinableQuery, UnionStatement, IntersectStatement};
+use query_builder::{Query, CombinableQuery, UnionStatement, IntersectStatement, ExceptStatement};
 use query_dsl::*;
 
 impl<L, R, Union, Type> UnionDsl<Union, Type>
@@ -30,5 +30,21 @@ impl<L, R, Intersect, Type> IntersectDsl<Intersect, Type>
 
     fn intersect_all(self, query: Intersect) -> Self::Output {
         IntersectStatement::new(self, query, true)
+    }
+}
+
+impl<L, R, Except, Type> ExceptDsl<Except, Type>
+    for UnionStatement<L, R> where
+    Except: CombinableQuery + Query<SqlType=Type>,
+    UnionStatement<L, R>: Query<SqlType=Type>,
+{
+    type Output = ExceptStatement<UnionStatement<L, R>, Except>;
+
+    fn except(self, query: Except) -> Self::Output {
+        ExceptStatement::new(self, query, false)
+    }
+
+    fn except_all(self, query: Except) -> Self::Output {
+        ExceptStatement::new(self, query, true)
     }
 }

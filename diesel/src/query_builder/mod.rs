@@ -19,6 +19,7 @@ pub mod insert_statement;
 pub mod update_statement;
 mod union_statement;
 mod intersect_statement;
+mod except_statement;
 
 #[doc(hidden)]
 pub use self::select_statement::{SelectStatement, BoxedSelectStatement};
@@ -30,6 +31,8 @@ pub use self::insert_statement::IncompleteInsertStatement;
 pub use self::union_statement::UnionStatement;
 #[doc(inline)]
 pub use self::intersect_statement::IntersectStatement;
+#[doc(inline)]
+pub use self::except_statement::ExceptStatement;
 
 use std::error::Error;
 

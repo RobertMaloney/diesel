@@ -8,7 +8,7 @@ use query_builder::offset_clause::*;
 use query_builder::order_clause::*;
 use query_builder::where_clause::*;
 use query_builder::{Query, CombinableQuery, QueryFragment, SelectStatement, UnionStatement};
-use query_builder::{IntersectStatement};
+use query_builder::{IntersectStatement, ExceptStatement};
 use query_dsl::*;
 use query_dsl::boxed_dsl::InternalBoxedDsl;
 use super::BoxedSelectStatement;
@@ -243,5 +243,21 @@ impl<ST, S, F, W, O, L, Of, G, Intersect, Type> IntersectDsl<Intersect, Type>
 
     fn intersect_all(self, query: Intersect) -> Self::Output {
         IntersectStatement::new(self, query, true)
+    }
+}
+
+impl<ST, S, F, W, O, L, Of, G, Except, Type> ExceptDsl<Except, Type>
+    for SelectStatement<ST, S, F, W, O, L, Of, G> where
+    Except: CombinableQuery + Query<SqlType=Type>,
+    SelectStatement<ST, S, F, W, O, L, Of, G>: Query<SqlType=Type>,
+{
+    type Output = ExceptStatement<SelectStatement<ST, S, F, W, O, L, Of, G>, Except>;
+
+    fn except(self, query: Except) -> Self::Output {
+        ExceptStatement::new(self, query, false)
+    }
+
+    fn except_all(self, query: Except) -> Self::Output {
+        ExceptStatement::new(self, query, true)
     }
 }

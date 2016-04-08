@@ -18,6 +18,7 @@ mod order_dsl;
 mod with_dsl;
 mod union_dsl;
 mod intersect_dsl;
+mod except_dsl;
 
 pub use self::belonging_to_dsl::BelongingToDsl;
 pub use self::boxed_dsl::BoxedDsl;
@@ -35,3 +36,4 @@ pub use self::select_dsl::{SelectDsl, SelectSqlDsl};
 pub use self::with_dsl::{WithDsl, WithQuerySource};
 pub use self::union_dsl::UnionDsl;
 pub use self::intersect_dsl::IntersectDsl;
+pub use self::except_dsl::ExceptDsl;
